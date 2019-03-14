@@ -36,12 +36,9 @@ async function exec() {
     let content = [
         '🌍 Located @ ' + location.join(', '),
         '🔋 Battery @ ' + data.charge_state.battery_level + '%',
+        '🔌 Charge port ' + data.charge_state.charge_port_latch
     ];
 
-    if (data.charge_state.charge_port_latch === 'Blocking') {
-        content.push('🔌 Not plugged in: ' + data.charge_state.charge_port_latch);
-
-    }
     const hook = process.env.IFTT + '?value1=' + encodeURI('🚗 ' + vehicleName) + '&value2=' + encodeURI(content.join("\n"));
     let response = await request(hook);
     console.log(response);
