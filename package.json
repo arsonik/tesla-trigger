@@ -13,6 +13,7 @@
     "async-request": "^1.2.0",
     "await-sleep": "0.0.1",
     "dotenv": "^7.0.0",
+    "node-geocoder": "^3.22.0",
     "teslajs": "^4.3.2"
   }
 }
