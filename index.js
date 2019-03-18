@@ -2,7 +2,7 @@ process.chdir(__dirname);
 
 require('dotenv').config();
 const tjs = require('teslajs');
-const request = require('async-request');
+const rp = require('request-promise');
 const sleep = require('await-sleep');
 const nodeGeocoder = require('node-geocoder');
 
@@ -67,15 +67,17 @@ if (process.argv.length === 3) {
 
         let hooks = JSON.parse(process.env.IFTT_HOOKS);
         for (let hook of hooks) {
-            let response = await request(hook, {
+            let response = await rp({
+                uri: hook,
                 method: 'POST',
-                data: {
+                json: true,
+                body: {
                     value1: '🚗 ' + vehicleName,
                     value2: content.join("\n"),
                     value3: 'https://media.glassdoor.com/sql/43129/tesla-squarelogo-1512420729170.png'
                 }
             });
-            console.log(response.body);
+            console.log(response);
         }
         process.exit(0);
     } catch (e) {
