@@ -27,6 +27,10 @@ const reverseCoords = async (lat, lon) => {
     });
 };
 
+const log = function () {
+    // console.log(arguments);
+};
+
 if (process.argv.length === 3) {
     token = process.argv[2];
 }
@@ -34,21 +38,22 @@ if (process.argv.length === 3) {
 (async () => {
     try {
         if (!token) {
-            console.log('Login as', process.env.USERNAME);
+            log('Login as', process.env.USERNAME);
             let result = await tjs.loginAsync(process.env.USERNAME, process.env.PASSWORD);
 
             token = result.authToken;
-            console.log('Logged in successfully');
+            log('Logged in successfully');
         }
 
-        console.log('Geting vehicle info', process.env.VEHICLE_ID);
+        log('Geting vehicle info', process.env.VEHICLE_ID);
         let vehicle = null;
         let attempt = 0;
         do {
+            attempt++;
             vehicle = await tjs.wakeUpAsync({authToken: token, vehicleID: process.env.VEHICLE_ID});
             if (vehicle.state === 'offline') {
-                console.log('Vehicle is offline, waking up !');
-                console.log('Sleeping');
+                log('Vehicle is offline, waking up !');
+                log('Sleeping');
                 await sleep(15 * 1000);
             }
         } while (vehicle.state === 'offline' && attempt < 10);
@@ -63,7 +68,7 @@ if (process.argv.length === 3) {
             '🔋 Battery @ ' + data.charge_state.battery_level + '%',
             '🔌 Charge port ' + data.charge_state.charge_port_latch
         ];
-        console.log(content.join("\n"));
+        log(content.join("\n"));
 
         let hooks = JSON.parse(process.env.IFTT_HOOKS);
         for (let hook of hooks) {
@@ -77,7 +82,7 @@ if (process.argv.length === 3) {
                     value3: 'https://media.glassdoor.com/sql/43129/tesla-squarelogo-1512420729170.png'
                 }
             });
-            console.log(response);
+            log(response);
         }
         process.exit(0);
     } catch (e) {
