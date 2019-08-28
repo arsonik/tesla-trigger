@@ -15,6 +15,6 @@
     "node-geocoder": "^3.23.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
-    "teslajs": "^4.3.3"
+    "teslajs": "^4.3.13"
   }
 }

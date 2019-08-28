@@ -28,12 +28,14 @@ const reverseCoords = async (lat, lon) => {
 };
 
 const log = function () {
-    // console.log(arguments);
+    console.log(arguments);
 };
 
 if (process.argv.length === 3) {
     token = process.argv[2];
 }
+
+let hooks = JSON.parse(process.env.IFTT_HOOKS);
 
 (async () => {
     try {
@@ -42,48 +44,61 @@ if (process.argv.length === 3) {
             let result = await tjs.loginAsync(process.env.USERNAME, process.env.PASSWORD);
 
             token = result.authToken;
-            log('Logged in successfully');
+            log('Logged in successfully with token ' + token);
         }
 
-        log('Geting vehicle info', process.env.VEHICLE_ID);
-        let vehicle = null;
-        let attempt = 0;
-        do {
-            attempt++;
-            vehicle = await tjs.wakeUpAsync({authToken: token, vehicleID: process.env.VEHICLE_ID});
-            if (vehicle.state === 'offline') {
-                log('Vehicle is offline, waking up !');
-                log('Sleeping');
-                await sleep(15 * 1000);
-            }
-        } while (vehicle.state === 'offline' && attempt < 10);
+        log('Getting all vehicles');
 
-        const data = await tjs.vehicleDataAsync({authToken: token, vehicleID: process.env.VEHICLE_ID});
-        const vehicleName = data.display_name;
+        const vehicles = await tjs.vehiclesAsync({authToken: token});
 
-        let place = await reverseCoords(data.drive_state.latitude, data.drive_state.longitude);
-
-        let content = [
-            '🌍 Located @ ' + place,
-            '🔋 Battery @ ' + data.charge_state.battery_level + '%',
-            '🔌 Charge port ' + data.charge_state.charge_port_latch
-        ];
-        log(content.join("\n"));
-
-        let hooks = JSON.parse(process.env.IFTT_HOOKS);
-        for (let hook of hooks) {
-            let response = await rp({
-                uri: hook,
-                method: 'POST',
-                json: true,
-                body: {
-                    value1: '🚗 ' + vehicleName,
-                    value2: content.join("\n"),
-                    value3: 'https://media.glassdoor.com/sql/43129/tesla-squarelogo-1512420729170.png'
+        for (let vehicle of vehicles) {
+            let vehiculeState = vehicle.state;
+            let attempt = 0;
+            while (vehiculeState === 'offline' && attempt < 10) {
+                attempt++;
+                log('Waking up ' + vehicle.display_name);
+                let avehicle = await tjs.wakeUpAsync({authToken: token, vehicleID: vehicle.id_s});
+                vehiculeState = avehicle.state;
+                if (vehiculeState === 'offline') {
+                    log('Sleep before retry');
+                    await sleep(15 * 1000);
                 }
-            });
-            log(response);
+            }
+
+            log('Getting vehicle data ' + vehicle.display_name);
+            let data = null;
+            attempt = 0;
+            while (!data && attempt < 10) {
+                attempt++;
+                try {
+                    data = await tjs.vehicleDataAsync({authToken: token, vehicleID: vehicle.id_s});
+                } catch (e) {
+                    await sleep(600);
+                }
+            }
+
+            let place = await reverseCoords(data.drive_state.latitude, data.drive_state.longitude);
+
+            let content = [
+                '🌍 ' + place,
+                '🔌 ' + data.charge_state.charging_state
+            ];
+
+            for (let hook of hooks) {
+                let response = await rp({
+                    uri: hook,
+                    method: 'POST',
+                    json: true,
+                    body: {
+                        value1: vehicle.display_name + ' 🔋 ' + data.charge_state.battery_level + '%',
+                        value2: content.join("\n"),
+                        value3: 'https://media.glassdoor.com/sql/43129/tesla-squarelogo-1512420729170.png'
+                    }
+                });
+                log(response);
+            }
         }
+
         process.exit(0);
     } catch (e) {
         console.error(e);
