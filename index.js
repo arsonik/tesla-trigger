@@ -42,6 +42,9 @@ let hooks = JSON.parse(process.env.IFTT_HOOKS);
         if (!token) {
             log('Login as', process.env.USERNAME);
             let result = await tjs.loginAsync(process.env.USERNAME, process.env.PASSWORD);
+            if (!result.authToken) {
+                throw new Error("No auth token");
+            }
 
             token = result.authToken;
             log('Logged in successfully with token ' + token);
@@ -52,14 +55,14 @@ let hooks = JSON.parse(process.env.IFTT_HOOKS);
         const vehicles = await tjs.vehiclesAsync({authToken: token});
 
         for (let vehicle of vehicles) {
-            let vehiculeState = vehicle.state;
+            let vehicleState = vehicle.state;
             let attempt = 0;
-            while (vehiculeState === 'offline' && attempt < 10) {
+            while ((vehicleState === 'offline' || vehicleState === 'asleep') && attempt < 10) {
                 attempt++;
                 log('Waking up ' + vehicle.display_name);
                 let avehicle = await tjs.wakeUpAsync({authToken: token, vehicleID: vehicle.id_s});
-                vehiculeState = avehicle.state;
-                if (vehiculeState === 'offline') {
+                vehicleState = avehicle.state;
+                if (vehicleState === 'offline' || vehicleState === 'asleep') {
                     log('Sleep before retry');
                     await sleep(15 * 1000);
                 }
@@ -73,8 +76,12 @@ let hooks = JSON.parse(process.env.IFTT_HOOKS);
                 try {
                     data = await tjs.vehicleDataAsync({authToken: token, vehicleID: vehicle.id_s});
                 } catch (e) {
-                    await sleep(600);
+                    console.log('sleep 1s')
+                    await sleep(1000);
                 }
+            }
+            if (!data) {
+                throw new Error("No data for vehicle");
             }
 
             let place = await reverseCoords(data.drive_state.latitude, data.drive_state.longitude);
