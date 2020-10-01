@@ -105,8 +105,7 @@ let hooks = JSON.parse(process.env.IFTT_HOOKS);
                 log(response);
             }
         }
-
-        process.exit(0);
+        process.exit();
     } catch (e) {
         console.error(e);
         process.exit(1);
