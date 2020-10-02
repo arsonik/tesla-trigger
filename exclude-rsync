@@ -1,0 +1,15 @@
+node_modules
+.git
+.idea
+.env
+gql
+exclude-rsync
+codegen.yml
+.gitignore
+.env.example
+rsync.sh
+README.md
+codegen.yml
+.graphqlconfig
+.prettierrc.json
+schema.graphql

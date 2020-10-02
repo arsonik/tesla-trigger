@@ -1,0 +1,21 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "arrow-body-style": ["error", "as-needed"],
+    "no-empty-pattern": "off",
+    "no-unused-vars": "error",
+    "no-duplicate-imports": "error",
+    "no-useless-concat": "error",
+    "prefer-template": "error",
+    "prefer-destructuring": "error",
+    "no-console": "warn"
+  }
+}

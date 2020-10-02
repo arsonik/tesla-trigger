@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "run": "node index.js",
-    "serve": "ts-node server.ts"
+    "runx": "node index.js",
+    "serve": "nodemon --exec \"ts-node\" server.ts",
+    "start": "ts-node -r dotenv/config ./server.ts",
+    "sync": "/bin/zsh ./rsync.sh"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +27,10 @@
     "typescript": "^4.0.3"
   },
   "devDependencies": {
-    "@types/teslajs": "^4.7.1"
+    "@types/teslajs": "^4.7.1",
+    "@typescript-eslint/eslint-plugin": "^4.3.0",
+    "@typescript-eslint/parser": "^4.3.0",
+    "eslint": "^7.10.0",
+    "nodemon": "^2.0.4"
   }
 }
