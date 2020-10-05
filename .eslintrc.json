@@ -1,13 +1,5 @@
 {
-  "root": true,
-  "parser": "@typescript-eslint/parser",
-  "plugins": [
-    "@typescript-eslint"
-  ],
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
-  ],
+  "extends": "./node_modules/gts/.eslintrc.json",
   "rules": {
     "arrow-body-style": ["error", "as-needed"],
     "no-empty-pattern": "off",
@@ -16,6 +8,6 @@
     "no-useless-concat": "error",
     "prefer-template": "error",
     "prefer-destructuring": "error",
-    "no-console": "warn"
+    "no-console": "error"
   }
 }
